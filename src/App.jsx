@@ -15,26 +15,44 @@ function App() {
   }
 
   async function getPokemon(id) {
-    let source = `https://pokeapi.co/api/v2/pokemon/${id}`;
-    await fetch(source)
-      .then((response) => response.json())
-      .then((data) => {
-        setPokemons((prevPokemons) => [
-          ...prevPokemons,
-          {
-            id: data.id,
-            name: data.name,
-            type: data.types[0].type.name,
-            height: data.height,
-            weight: data.weight,
-            abilities: data.abilities,
-            imageUrl: data.sprites.front_default,
-          },
-        ]);
-      })
+    try {
+      let source = `https://pokeapi.co/api/v2/pokemon/${id}`;
+      let response = await fetch(source);
+      let mainData = await response.json();
+      let genderSource = `https://pokeapi.co/api/v2/pokemon-species/${mainData.name}`;
+      let typeSource = `https://pokeapi.co/api/v2/type/${mainData.types[0].type.name}`;
+      let genderName = null;
 
-      //name ,data.types[0].type.name, height, weight, abilities
-      .catch((err) => console.log(err));
+      response = await fetch(genderSource);
+      let genderData = await response.json();
+      if (genderData.gender_rate == 1) {
+        genderName = "female";
+      } else if (genderData.gender_rate == 2) {
+        genderName = "male";
+      } else {
+        genderName = "genderless";
+      }
+
+      response = await fetch(typeSource);
+      let typeData = await response.json();
+
+      setPokemons((prevPokemons) => [
+        ...prevPokemons,
+        {
+          id: mainData.id,
+          name: mainData.name,
+          type: mainData.types[0].type.name,
+          height: mainData.height,
+          weight: mainData.weight,
+          abilities: mainData.abilities,
+          imageUrl: mainData.sprites.front_default,
+          gender: genderName,
+          vulnerabilities: typeData.damage_relations.double_damage_from,
+        },
+      ]);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   return (
@@ -74,3 +92,26 @@ function App() {
 }
 
 export default App;
+
+// async function getPokemon(id) {
+//   let source = `https://pokeapi.co/api/v2/pokemon/${id}`;
+//   await fetch(source)
+//     .then((response) => response.json())
+//     .then((data) => {
+//       setPokemons((prevPokemons) => [
+//         ...prevPokemons,
+//         {
+//           id: data.id,
+//           name: data.name,
+//           type: data.types[0].type.name,
+//           height: data.height,
+//           weight: data.weight,
+//           abilities: data.abilities,
+//           imageUrl: data.sprites.front_default,
+//         },
+//       ]);
+//     })
+
+//     //name ,data.types[0].type.name, height, weight, abilities
+//     .catch((err) => console.log(err));
+// }
