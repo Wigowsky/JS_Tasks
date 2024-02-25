@@ -29,8 +29,10 @@ function App() {
         genderName = "female";
       } else if (genderData.gender_rate == 2) {
         genderName = "male";
-      } else {
+      } else if (genderData.gender_rate == -1) {
         genderName = "genderless";
+      } else {
+        genderName = "indefinite";
       }
 
       response = await fetch(typeSource);
